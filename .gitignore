@@ -1,0 +1,6 @@
+# ignore all terraform configuration
+*terraform* 
+*.zip
+
+# ignore source output files
+**/source_output/*
