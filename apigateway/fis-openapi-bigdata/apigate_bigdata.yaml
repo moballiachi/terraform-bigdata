@@ -1,0 +1,133 @@
+openapi: 3.0.0
+# Added by API Auto Mocking Plugin
+servers:
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/moballiachi/fis-paas-bigdata/1.0.0
+
+info:
+  title: fis-paas-bigdata
+  description: 'Servicio API Gateway AWS perteneciente al aplicativo FIS bigdata que contiene todas las firmas de contrato para la gestión de información de bigdata. Puedes conseguir más información en nuestro sitio web [https://aws.amazon.com/big-data/getting-started/](https://aws.amazon.com/big-data/getting-started/).' # TODO: Actualizar enlace al sitio de APIs.
+  version: "1.0.0"
+  termsOfService: https://aws.amazon.com/big-data/getting-started/ # TODO: Términos de servicio
+  contact:
+    name: Company Support Center
+    url: https://aws.amazon.com/big-data/getting-started/
+    email: monballiachi@gmail.com
+  license:
+    name: Company API License # TODO: Definir el tipo y nombre de la licencia.
+    url: https://aws.amazon.com/big-data/getting-started/ # TODO: Publicar licencia.
+    
+tags:
+  - name: Catalogues 
+    description: Operaciones relacionadas con con la creación, modificación, consulta y servicios para la transformacion de data.
+
+paths:
+  /catalogue/{catalogue}:
+    get:
+      tags:
+        - Catalogues
+      summary: "Consulta el catálogo perteneciente a un inquilino por el código de un catálogo."
+      description: "Efectua consulta del catálogo de un inquilino por el código de un catálogo."
+      operationId: CataloguesGETMaxNumber
+      parameters:
+       # HEADER REQUEST
+        - $ref: "https://cobis-paas-specs.s3.amazonaws.com/paas-specs-domain/AdminDomain.json#/components/parameters/Authorization"
+        - $ref: "https://cobis-paas-specs.s3.amazonaws.com/paas-specs-domain/AdminDomain.json#/components/parameters/X-Request-ID"
+        - $ref: "https://cobis-paas-specs.s3.amazonaws.com/paas-specs-domain/AdminDomain.json#/components/parameters/X-Financial-ID"
+        - $ref: "https://cobis-paas-specs.s3.amazonaws.com/paas-specs-domain/AdminDomain.json#/components/parameters/X-EndUser-Login"
+        - $ref: "https://cobis-paas-specs.s3.amazonaws.com/paas-specs-domain/AdminDomain.json#/components/parameters/X-EndUser-RequestDateTime"
+        - $ref: "https://cobis-paas-specs.s3.amazonaws.com/paas-specs-domain/AdminDomain.json#/components/parameters/X-EndUser-Terminal"
+        - $ref: "https://cobis-paas-specs.s3.amazonaws.com/paas-specs-domain/AdminDomain.json#/components/parameters/X-EndUser-LastLoggedDateTime"
+      # PATH PARAMS
+        - name: catalogue
+          in: path
+          required: true
+          description: "Código del catálogo."
+          schema:
+            type: string
+            minimum: 1
+      responses:
+        200:
+          description: "Información del catálogo."
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/schemas/XCorrelationID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CataloguesGETMaxNumberRs'
+              example:
+                catalogues: 
+                  - catalogue:
+                      code: "D"
+                      name: "Eliminado"
+                  - catalogue:
+                      code: "A"
+                      name: "Activo"
+        400:
+          $ref: "https://cobis-paas-specs.s3.amazonaws.com/paas-specs-domain/AdminDomain.json#/components/responses/400BadRequest"
+        401:
+          $ref: "https://cobis-paas-specs.s3.amazonaws.com/paas-specs-domain/AdminDomain.json#/components/responses/401Unauthorized"
+        403:
+          $ref: "https://cobis-paas-specs.s3.amazonaws.com/paas-specs-domain/AdminDomain.json#/components/responses/403Forbidden"
+        404:
+          $ref: "https://cobis-paas-specs.s3.amazonaws.com/paas-specs-domain/AdminDomain.json#/components/responses/404NotFound"
+        405:
+          $ref: "https://cobis-paas-specs.s3.amazonaws.com/paas-specs-domain/AdminDomain.json#/components/responses/405MethodNotAllowed"
+        406:
+          $ref: "https://cobis-paas-specs.s3.amazonaws.com/paas-specs-domain/AdminDomain.json#/components/responses/406NotAcceptable"
+        429:
+          $ref: "https://cobis-paas-specs.s3.amazonaws.com/paas-specs-domain/AdminDomain.json#/components/responses/429TooManyRequests"
+        500:
+          $ref: "https://cobis-paas-specs.s3.amazonaws.com/paas-specs-domain/AdminDomain.json#/components/responses/500InternalServerError" 
+      x-amazon-apigateway-integration:
+        httpMethod: GET
+        type: aws
+        uri: arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/${lambda_bigdata_arn}/invocations
+        responses : {
+            default : {
+              statusCode : 200
+            }
+        }
+        requestTemplates : { "application/json" : "${standar_request_integration}" }
+
+components:
+  schemas:
+    Catalogue:
+      description: 'Metadata de un catálogo.'
+      type: object
+      properties:
+        code: #field: code
+          description:  'Código de la metadata.'
+          type: string
+          minimum: 1
+          maximum: 64
+        name: #field: name
+          description:  'Descripción de la metadata.'
+          type: string
+          minLength: 1
+          maxLength:  128
+        catalogue:  #field: catalogue
+          description:  'Código del catálogo.'
+          type: string
+          minimum: 1
+          maximum: 64
+    CataloguesGETMaxNumberRs:
+      description: 'Respuesta de la consulta del maximo numero.'
+      type: object
+      required:
+        - catalogues
+      properties:
+        catalogues:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/Catalogue'
+              - type: object
+            required:
+              - code
+              - name       
+              - catalogue
+              
+    XCorrelationID:
+      description: "ID que relaciona la respuesta con la solicitud. El valor de este campo debe coincidir con el valor X-Request-ID enviado en la solicitud."
